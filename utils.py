@@ -29,18 +29,27 @@ def check_winner(board, player):
            check_column(board, player) or \
            check_diagonal(board, player)
 
+def convert_list_to_tuple(board):
+    return tuple(tuple(row) for row in board)
+
+def convert_tuple_to_list(board):
+    return [list(row) for row in board]
+
 def add_move(board, move, player):
     row, col = move
 
     try:
         if row < 0 or row >= 3 or col < 0 or col >= 3:
-            return False, board
+            return None
         
         if board[row][col] == '_':
-            new_board = [row[:] for row in board]
+            new_board = convert_tuple_to_list(board)
             new_board[row][col] = 'X' if player == 0 else 'O'
-            return True, new_board
+
+            new_board = convert_list_to_tuple(new_board)
+            return new_board
         
-        return False, board
+        return None
     except:
-        return False, board
+        return None
+    

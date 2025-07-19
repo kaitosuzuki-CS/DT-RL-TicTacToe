@@ -2,7 +2,7 @@ import pickle
 import random
 from utils import add_move, check_winner, check_draw
 class DecisionTree():
-    def __init__(self, board=[['_', '_', '_'], ['_', '_', '_'], ['_', '_', '_']], player=0):
+    def __init__(self, board=(('_', '_', '_'), ('_', '_', '_'), ('_', '_', '_')), player=0):
         self.moves = {}
         self.board = board
         self.player = player
@@ -21,7 +21,6 @@ class DecisionTree():
     def get_best_move(self):
         best_score = self.get_best_score()
         options = [m for m in self.moves if self.moves[m][1] == best_score]
-        print(options)
         return random.choice(options) if options else None
 
     def train(self):
@@ -35,9 +34,9 @@ class DecisionTree():
             for col in range(3):
                 move = (row, col)
 
-                placement, new_board = add_move(self.board, move, self.player)
+                new_board = add_move(self.board, move, self.player)
                 
-                if placement:
+                if new_board:
                     child_tree = DecisionTree(new_board, 1 - self.player)
 
                     self.moves[move] = (child_tree, child_tree.train())
@@ -45,7 +44,7 @@ class DecisionTree():
         return self.get_best_score()
 
 def play():
-    board = [['_', '_', '_'], ['_', '_', '_'], ['_', '_', '_']]
+    board = (('_', '_', '_'), ('_', '_', '_'), ('_', '_', '_'))
     player = 0
 
     with open('decision_tree.pkl', 'rb') as f:
@@ -66,11 +65,13 @@ def play():
 
             print("Player's move:", move)
         
-        valid_move, board = add_move(board, move, player)
+        new_board = add_move(board, move, player)
         
-        if not valid_move:
+        if not new_board:
             print("Invalid move, try again.")
             continue
+
+        board = new_board
             
         print("Current board:")
         for row in board:
@@ -85,13 +86,3 @@ def play():
             
         player = 1 - player
         ai = ai.moves[move][0]
-
-# if __name__ == "__main__":
-#     ai = DecisionTree()
-#     ai.train()
-
-#     with open('decision_tree.pkl', 'wb') as f:
-#         pickle.dump(ai, f)
-
-if __name__ == "__main__":
-    play()
