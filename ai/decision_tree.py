@@ -37,9 +37,9 @@ class DecisionTree:
     def _train(self):
         prev_player = 1 - self.player
         if check_winner(self.board, prev_player):
-            return 1 if prev_player == 0 else -2
+            return 1 if prev_player == 0 else -1
         if check_draw(self.board):
-            return -1
+            return 0
 
         for row in range(3):
             for col in range(3):
