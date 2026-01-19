@@ -135,8 +135,8 @@ def train_RL_RL(num_episodes=1200000):
         total_reward += reward
 
         if _ % 1000 == 0:
-            epsilon = epsilon * 0.99 if epsilon * 0.99 >= 0.0005 else 0
-            alpha = 0.001 if epsilon * 0.99 >= 0.0005 else 0.0001
+            epsilon = max(epsilon * 0.999, 0.01)
+            alpha = 0.001 if epsilon > 0.01 else 0.0001
 
         if _ % 10000 == 0:
             print(
@@ -202,8 +202,8 @@ def train_RL_DT(dt, num_episodes=1200000):
         total_reward += reward
 
         if _ % 1000 == 0:
-            epsilon = epsilon * 0.99 if epsilon * 0.99 >= 0.0005 else 0
-            alpha = 0.001 if epsilon * 0.99 >= 0.0005 else 0.0001
+            epsilon = max(epsilon * 0.999, 0.01)
+            alpha = 0.001 if epsilon > 0.01 else 0.0001
 
         if _ % 10000 == 0:
             print(
@@ -268,8 +268,8 @@ def train_DT_RL(dt, num_episodes=1200000):
         total_reward += reward
 
         if _ % 1000 == 0:
-            epsilon = epsilon * 0.99 if epsilon * 0.99 >= 0.0005 else 0
-            alpha = 0.001 if epsilon * 0.99 >= 0.0005 else 0.0001
+            epsilon = max(epsilon * 0.999, 0.01)
+            alpha = 0.001 if epsilon > 0.01 else 0.0001
 
         if _ % 10000 == 0:
             print(
