@@ -1,3 +1,13 @@
+import os
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+
+parent_dir = Path(__file__).resolve().parent.parent
+checkpoints_dir = parent_dir / "images"
+checkpoints_dir.mkdir(exist_ok=True)
+
+
 def check_row(board, player):
     for row in board:
         if row.count(player) == 3:
@@ -61,3 +71,16 @@ def add_move(board, move, player):
         return None
     except:
         return None
+
+
+def plot_loss_curve(steps, losses, title="Training Loss Curve"):
+    plt.figure(figsize=(10, 6))
+    plt.plot(steps, losses, label="Loss (Opponent Wins)", color="red")
+    plt.xlabel("Episodes")
+    plt.ylabel("Loss Count (per 10k episodes)")
+    plt.title(title)
+    plt.legend()
+    plt.grid(True)
+
+    plt.savefig(os.path.join(checkpoints_dir, f"{title}.png"))
+    plt.show()

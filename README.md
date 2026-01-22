@@ -151,6 +151,19 @@ python test_model.py --type RL_RL --first true --num-games 100
 
 This will simulate 100 games where the RL agent plays first against the Decision Tree.
 
+## Results
+
+### Training Analysis
+
+**RL vs Decision Tree**
+
+![DT vs RL Loss Curve](images/DT%20vs%20RL%20Loss%20Curve.png)
+![RL vs DT Loss Curve](images/RL%20vs%20DT%20Loss%20Curve.png)
+
+**RL vs RL (Self-Play)**
+
+![RL vs RL Nondraw Curve](images/RL%20vs%20RL%20Nondraw%20Curve.png)
+
 ## Project Files
 
 - **`train.py`**: The main driver for training. It parses command-line arguments to select the training mode (`DT_RL` or `RL_RL`) and initiates the training process.

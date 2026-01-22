@@ -4,6 +4,7 @@ import random
 from collections import defaultdict
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
@@ -14,6 +15,7 @@ from ai.utils import (
     check_winner,
     convert_list_to_tuple,
     convert_tuple_to_list,
+    plot_loss_curve,
 )
 
 parent_dir = Path(__file__).resolve().parent.parent
@@ -81,7 +83,10 @@ def train_RL_RL(num_episodes=1200000):
     epsilon = 1.0
 
     total_reward = 0
-    total_loss = 0
+    total_nondraw = 0
+
+    nondraw_history = []
+    steps = []
 
     for _ in range(1, num_episodes + 1):
         state = [["_", "_", "_"], ["_", "_", "_"], ["_", "_", "_"]]
@@ -94,6 +99,7 @@ def train_RL_RL(num_episodes=1200000):
             afterstate = add_move(state, action, 0)
 
             if check_winner(afterstate, 0):
+                total_nondraw += 1
                 reward = 1
                 break
             elif check_draw(afterstate):
@@ -112,7 +118,7 @@ def train_RL_RL(num_episodes=1200000):
             new_state = add_move(afterstate, DT_move, 1)
 
             if check_winner(new_state, 1):
-                total_loss += 1
+                total_nondraw += 1
                 reward = -1
                 break
             elif check_draw(new_state):
@@ -135,18 +141,21 @@ def train_RL_RL(num_episodes=1200000):
         total_reward += reward
 
         if _ % 1000 == 0:
-            epsilon = max(epsilon * 0.999, 0.01)
-            alpha = 0.001 if epsilon > 0.01 else 0.0001
+            epsilon = epsilon * 0.99 if epsilon * 0.99 >= 0.0001 else 0
+            alpha = 0.001 if epsilon * 0.99 >= 0.0001 else 0.0001
 
         if _ % 10000 == 0:
             print(
-                f"Episode {_}: Epsilon: {epsilon}, Alpha: {alpha}, Reward: {total_reward / 10000}, Loss: {total_loss}"
+                f"Episode {_}: Epsilon: {epsilon}, Alpha: {alpha}, Reward: {total_reward / 10000}, Non Draws: {total_nondraw}"
             )
-            total_reward = 0
-            total_loss = 0
 
-    with open(os.path.join(checkpoints_dir, "q_table_RL_RL.pkl"), "wb") as f:
-        pickle.dump(Q, f)
+            nondraw_history.append(total_nondraw)
+            steps.append(_)
+
+            total_reward = 0
+            total_nondraw = 0
+
+    return steps, nondraw_history
 
 
 def train_RL_DT(dt, num_episodes=1200000):
@@ -156,6 +165,9 @@ def train_RL_DT(dt, num_episodes=1200000):
 
     total_reward = 0
     total_loss = 0
+
+    loss_history = []
+    steps = []
 
     for _ in range(1, num_episodes + 1):
         ai = dt
@@ -202,15 +214,21 @@ def train_RL_DT(dt, num_episodes=1200000):
         total_reward += reward
 
         if _ % 1000 == 0:
-            epsilon = max(epsilon * 0.999, 0.01)
-            alpha = 0.001 if epsilon > 0.01 else 0.0001
+            epsilon = epsilon * 0.99 if epsilon * 0.99 >= 0.0001 else 0
+            alpha = 0.001 if epsilon * 0.99 >= 0.0001 else 0.0001
 
         if _ % 10000 == 0:
             print(
                 f"Episode {_}: Epsilon: {epsilon}, Alpha: {alpha}, Reward: {total_reward / 10000}, Loss: {total_loss}"
             )
+
+            loss_history.append(total_loss)
+            steps.append(_)
+
             total_reward = 0
             total_loss = 0
+
+    return steps, loss_history
 
 
 def train_DT_RL(dt, num_episodes=1200000):
@@ -220,6 +238,9 @@ def train_DT_RL(dt, num_episodes=1200000):
 
     total_reward = 0
     total_loss = 0
+
+    loss_history = []
+    steps = []
 
     for _ in range(1, num_episodes + 1):
         ai = dt
@@ -268,22 +289,41 @@ def train_DT_RL(dt, num_episodes=1200000):
         total_reward += reward
 
         if _ % 1000 == 0:
-            epsilon = max(epsilon * 0.999, 0.01)
-            alpha = 0.001 if epsilon > 0.01 else 0.0001
+            epsilon = epsilon * 0.99 if epsilon * 0.99 >= 0.0001 else 0
+            alpha = 0.001 if epsilon * 0.99 >= 0.0001 else 0.0001
 
         if _ % 10000 == 0:
             print(
                 f"Episode {_}: Epsilon: {epsilon}, Alpha: {alpha}, Reward: {total_reward / 10000}, Loss: {total_loss}"
             )
+
+            loss_history.append(total_loss)
+            steps.append(_)
+
             total_reward = 0
             total_loss = 0
+
+    return steps, loss_history
 
 
 def train_with_DT(dt, num_episodes=1200000):
     initialize_q()
 
-    train_DT_RL(dt, num_episodes)
-    train_RL_DT(dt, num_episodes)
+    steps1, loss_history1 = train_DT_RL(dt, num_episodes)
+    steps2, loss_history2 = train_RL_DT(dt, num_episodes)
+
+    plot_loss_curve(steps1, loss_history1, title="DT vs RL Loss Curve")
+    plot_loss_curve(steps2, loss_history2, title="RL vs DT Loss Curve")
 
     with open(os.path.join(checkpoints_dir, "q_table_DT_RL.pkl"), "wb") as f:
+        pickle.dump(Q, f)
+
+
+def train_with_self_play(num_episodes=1200000):
+    initialize_q()
+
+    steps, loss_history = train_RL_RL(num_episodes)
+    plot_loss_curve(steps, loss_history, title="RL vs RL Nondraw Curve")
+
+    with open(os.path.join(checkpoints_dir, "q_table_RL_RL.pkl"), "wb") as f:
         pickle.dump(Q, f)

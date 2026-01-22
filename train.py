@@ -1,7 +1,7 @@
 import argparse
 
 from ai.decision_tree import DecisionTree
-from ai.q_learning import train_RL_RL, train_with_DT
+from ai.q_learning import train_RL_RL, train_with_DT, train_with_self_play
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -29,6 +29,6 @@ if __name__ == "__main__":
 
         train_with_DT(ai, args.num_episodes)
     elif args.mode == "RL_RL":
-        train_RL_RL(args.num_episodes)
+        train_with_self_play(args.num_episodes)
     else:
         print("Invalid mode selected.")
